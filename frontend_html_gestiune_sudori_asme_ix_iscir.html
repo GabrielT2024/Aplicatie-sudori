@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gestiune Sudori – ASME Sec IX / ISCIR CR9-CR7</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#0b1020; --card:#151a2c; --muted:#8aa0b6; --text:#e9eef5; --accent:#4da3ff; --ok:#30c48d; --warn:#ffb020; --bad:#ff6b6b; }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:linear-gradient(180deg,#0b1020,#0e152b 40%,#0b1020); color:var(--text); }
+    header{ padding:18px 22px; border-bottom:1px solid #212642; position:sticky; top:0; background:rgba(11,16,32,.8); backdrop-filter:saturate(140%) blur(6px); display:flex; gap:16px; align-items:center; z-index:10; }
+    header h1{ font-size:18px; margin:0; letter-spacing:.3px; }
+    header .pill{ font-size:12px; padding:4px 10px; border-radius:999px; background:#18213f; color:#a8c2ff; border:1px solid #223265; }
+    main{ padding:24px; max-width:1200px; margin:0 auto; }
+
+    .grid{ display:grid; grid-template-columns: 360px 1fr; gap:20px; align-items:start; }
+    .card{ background:var(--card); border:1px solid #222a44; border-radius:16px; box-shadow:0 8px 28px rgba(0,0,0,.25); overflow:hidden; }
+    .card h2{ margin:0; font-size:16px; padding:14px 16px; border-bottom:1px solid #222a44; background:#121833; }
+    .card .content{ padding:14px 16px; }
+    .muted{ color:var(--muted); font-size:13px; }
+    .row{ display:flex; gap:10px; }
+    .row > *{ flex:1; }
+    label{ font-size:12px; color:#a8b7cc; display:block; margin:8px 0 6px; }
+    input, select, textarea{ width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3458; background:#0f1430; color:var(--text); outline:none; }
+    input::placeholder, textarea::placeholder{ color:#7f8fb0; }
+    button{ appearance:none; border:none; border-radius:12px; padding:10px 14px; font-weight:600; cursor:pointer; }
+    .btn{ background:var(--accent); color:#081225; }
+    .btn.secondary{ background:#203057; color:#cfe2ff; }
+    .btn.ghost{ background:transparent; border:1px solid #2a3458; color:#cfe2ff; }
+    .btn.danger{ background:var(--bad); color:#1a0c0c; }
+    .toolbar{ display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+
+    table{ width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:14px; border:1px solid #222a44; }
+    th, td{ text-align:left; padding:10px 12px; font-size:14px; }
+    thead th{ background:#121833; position:sticky; top:0; z-index:1; }
+    tbody tr:nth-child(odd){ background:#0f1631; }
+    tbody tr:nth-child(even){ background:#0e152f; }
+    tbody tr:hover{ outline:2px solid #2a3c6a; }
+    .status{ font-size:12px; padding:4px 8px; border-radius:999px; display:inline-block; border:1px solid transparent; }
+    .status.ok{ background:rgba(48,196,141,.15); color:#88e9c7; border-color:rgba(48,196,141,.3); }
+    .status.warn{ background:rgba(255,176,32,.12); color:#ffd591; border-color:rgba(255,176,32,.28); }
+    .status.bad{ background:rgba(255,107,107,.12); color:#ffb4b4; border-color:rgba(255,107,107,.26); }
+
+    .list{ max-height:480px; overflow:auto; }
+    .section-title{ display:flex; align-items:center; gap:8px; margin:8px 0 4px; }
+    .tag{ font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid #2a3458; color:#9fb3d8; background:#101838; }
+    .help{ font-size:12px; color:#94a8c9; margin-top:8px; }
+    .danger-zone{ border-top:1px dashed #2a3458; margin-top:12px; padding-top:12px; }
+    footer{ margin-top:22px; color:#8aa0b6; font-size:12px; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Gestiune Sudori</h1>
+    <span class="pill">ASME Sec IX · ISCIR CR9 / CR7</span>
+    <span class="muted">Frontend HTML (consumă API FastAPI la <span class="mono">http://localhost:8000</span>)</span>
+  </header>
+  <main>
+    <div class="grid">
+      <!-- Stânga: formular sudor -->
+      <section class="card">
+        <h2>Sudor</h2>
+        <div class="content">
+          <div class="row">
+            <div>
+              <label>Nume și prenume</label>
+              <input id="w_name" placeholder="ex: Popescu Ion" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Cod intern / Matricol</label>
+              <input id="w_code" placeholder="ex: W-017" />
+            </div>
+            <div>
+              <label>Data angajării</label>
+              <input id="w_hire" type="date" />
+            </div>
+          </div>
+          <div class="toolbar">
+            <button class="btn" id="btn_save_welder">Salvează / Actualizează</button>
+            <button class="btn secondary" id="btn_reset_welder">Curăță</button>
+            <button class="btn danger" id="btn_delete_welder" title="Șterge sudorul selectat">Șterge</button>
+          </div>
+          <p class="help">Selectează un sudor din listă pentru a-l edita sau adaugă unul nou.
+          </p>
+        </div>
+      </section>
+
+      <!-- Dreapta: listă sudori + calificări -->
+      <section class="card">
+        <h2>Listă sudori</h2>
+        <div class="content">
+          <div class="list">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:34%">Nume</th>
+                  <th>Cod</th>
+                  <th>Calificări active</th>
+                  <th>Expirări</th>
+                </tr>
+              </thead>
+              <tbody id="welders_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:20px;">
+      <h2>Calificări / Autorizații pentru: <span id="current_welder" class="tag">(niciuna selectată)</span></h2>
+      <div class="content">
+        <div class="row">
+          <div>
+            <label>Standard</label>
+            <select id="q_standard">
+              <option value="ASME_IX">ASME Secțiunea IX</option>
+              <option value="ISCIR_CR9">ISCIR CR9 (procedură)</option>
+              <option value="ISCIR_CR7">ISCIR CR7 (sudor)</option>
+            </select>
+          </div>
+          <div>
+            <label>Proces sudare</label>
+            <select id="q_process">
+              <option>GMAW (MIG/MAG)</option>
+              <option>GTAW (TIG)</option>
+              <option>SMAW (MMA)</option>
+              <option>FCAW</option>
+              <option>SAW</option>
+            </select>
+          </div>
+          <div>
+            <label>Poziție</label>
+            <select id="q_position">
+              <option>PA</option><option>PB</option><option>PC</option><option>PD</option><option>PE</option><option>PF</option><option>PG</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>P-No. (material)</label>
+            <input id="q_pno" placeholder="ex: P-No. 1" />
+          </div>
+          <div>
+            <label>Interval grosime (t)</label>
+            <input id="q_thk" placeholder="ex: 3–12 mm" />
+          </div>
+          <div>
+            <label>Produs</label>
+            <select id="q_product">
+              <option>Placă</option>
+              <option>Țeavă</option>
+              <option>Coloană</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Nr. certificat / autorizație</label>
+            <input id="q_cert" placeholder="ex: Q-2025-044" />
+          </div>
+          <div>
+            <label>Emitent</label>
+            <input id="q_issuer" placeholder="ex: Organism Aprob." />
+          </div>
+          <div>
+            <label>Data expirării</label>
+            <input id="q_expiry" type="date" />
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn" id="btn_add_qual">Adaugă calificare</button>
+          <button class="btn ghost" id="btn_refresh_qual">Reîncarcă</button>
+        </div>
+
+        <div class="section-title">
+          <strong>Calificări existente</strong>
+          <span class="tag">calcul automat stare: activ / aproape expirat / expirat</span>
+        </div>
+        <div class="list">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:20%">Standard</th>
+                <th>Proces</th>
+                <th>Poziție</th>
+                <th>P-No.</th>
+                <th>t</th>
+                <th>Produs</th>
+                <th>Certificat</th>
+                <th>Expiră</th>
+                <th>Stare</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="quals_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Sugestie: rulează backend-ul FastAPI pe <span class="mono">http://localhost:8000</span> cu CORS permis pentru <span class="mono">http://localhost</span>.
+    </footer>
+  </main>
+
+<script>
+const API = 'http://localhost:8000';
+let selectedWelder = null; // obiectul sudor selectat
+
+function statusBadge(expiry){
+  if(!expiry) return '<span class="status warn">n/a</span>';
+  const today = new Date();
+  const d = new Date(expiry);
+  const diff = Math.ceil((d - today) / (1000*60*60*24));
+  if (diff < 0) return '<span class="status bad">expirat</span>';
+  if (diff <= 30) return '<span class="status warn">aproape expirat</span>';
+  return '<span class="status ok">activ</span>';
+}
+
+async function fetchJSON(url, opts={}){
+  const res = await fetch(url, { headers:{'Content-Type':'application/json'}, ...opts });
+  if(!res.ok){
+    const t = await res.text();
+    throw new Error(`HTTP ${res.status}: ${t}`);
+  }
+  return res.json();
+}
+
+async function loadWelders(){
+  const data = await fetchJSON(`${API}/welders`);
+  const tbody = document.getElementById('welders_tbody');
+  tbody.innerHTML = '';
+  data.forEach(w => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><a href="#" data-id="${w.id}" class="welder_link">${w.name}</a></td>
+      <td>${w.code ?? ''}</td>
+      <td>${w.active_quals_count ?? 0}</td>
+      <td>${w.next_expiring ?? ''}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.querySelectorAll('.welder_link').forEach(a => {
+    a.addEventListener('click', async (e)=>{
+      e.preventDefault();
+      const id = a.getAttribute('data-id');
+      const w = await fetchJSON(`${API}/welders/${id}`);
+      selectedWelder = w;
+      fillWelderForm(w);
+      document.getElementById('current_welder').textContent = `${w.name} (#${w.id})`;
+      await loadQualifications();
+    });
+  });
+}
+
+function fillWelderForm(w){
+  document.getElementById('w_name').value = w?.name ?? '';
+  document.getElementById('w_code').value = w?.code ?? '';
+  document.getElementById('w_hire').value = w?.hire_date ?? '';
+}
+
+function resetWelderForm(){
+  selectedWelder = null;
+  document.getElementById('w_name').value = '';
+  document.getElementById('w_code').value = '';
+  document.getElementById('w_hire').value = '';
+  document.getElementById('current_welder').textContent = '(niciuna selectată)';
+  document.getElementById('quals_tbody').innerHTML = '';
+}
+
+async function saveWelder(){
+  const payload = {
+    name: document.getElementById('w_name').value.trim(),
+    code: document.getElementById('w_code').value.trim() || null,
+    hire_date: document.getElementById('w_hire').value || null,
+  };
+  if(!payload.name){ alert('Completează numele.'); return; }
+  if(selectedWelder){
+    const w = await fetchJSON(`${API}/welders/${selectedWelder.id}`, {method:'PUT', body:JSON.stringify(payload)});
+    selectedWelder = w; fillWelderForm(w); await loadWelders();
+  } else {
+    const w = await fetchJSON(`${API}/welders`, {method:'POST', body:JSON.stringify(payload)});
+    selectedWelder = w; fillWelderForm(w); await loadWelders();
+    document.getElementById('current_welder').textContent = `${w.name} (#${w.id})`;
+  }
+}
+
+async function deleteWelder(){
+  if(!selectedWelder){ alert('Selectează mai întâi un sudor.'); return; }
+  if(!confirm(`Sigur ștergi sudorul ${selectedWelder.name}?`)) return;
+  await fetchJSON(`${API}/welders/${selectedWelder.id}`, {method:'DELETE'});
+  resetWelderForm();
+  await loadWelders();
+}
+
+function collectQualPayload(){
+  return {
+    welder_id: selectedWelder?.id ?? null,
+    standard: document.getElementById('q_standard').value,
+    process: document.getElementById('q_process').value,
+    position: document.getElementById('q_position').value,
+    p_number: document.getElementById('q_pno').value.trim() || null,
+    thickness_range: document.getElementById('q_thk').value.trim() || null,
+    product: document.getElementById('q_product').value,
+    certificate_no: document.getElementById('q_cert').value.trim() || null,
+    issuer: document.getElementById('q_issuer').value.trim() || null,
+    expiry_date: document.getElementById('q_expiry').value || null,
+  };
+}
+
+async function addQualification(){
+  if(!selectedWelder){ alert('Selectează un sudor înainte de a adăuga o calificare.'); return; }
+  const payload = collectQualPayload();
+  payload.welder_id = selectedWelder.id;
+  await fetchJSON(`${API}/qualifications`, {method:'POST', body:JSON.stringify(payload)});
+  await loadQualifications();
+}
+
+async function loadQualifications(){
+  if(!selectedWelder){ document.getElementById('quals_tbody').innerHTML = ''; return; }
+  const list = await fetchJSON(`${API}/welders/${selectedWelder.id}/qualifications`);
+  const tbody = document.getElementById('quals_tbody');
+  tbody.innerHTML = '';
+  list.forEach(q => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${q.standard_label}</td>
+      <td>${q.process}</td>
+      <td>${q.position}</td>
+      <td>${q.p_number ?? ''}</td>
+      <td>${q.thickness_range ?? ''}</td>
+      <td>${q.product}</td>
+      <td>${q.certificate_no ?? ''}</td>
+      <td>${q.expiry_date ?? ''}</td>
+      <td>${statusBadge(q.expiry_date)}</td>
+      <td><button class="btn ghost" data-id="${q.id}" data-action="del">Șterge</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  tbody.querySelectorAll('button[data-action="del"]').forEach(btn => {
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-id');
+      if(confirm('Ștergi această calificare?')){
+        await fetchJSON(`${API}/qualifications/${id}`, {method:'DELETE'});
+        await loadQualifications();
+        await loadWelders();
+      }
+    });
+  });
+}
+
+// Event listeners
+window.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('btn_save_welder').addEventListener('click', saveWelder);
+  document.getElementById('btn_reset_welder').addEventListener('click', resetWelderForm);
+  document.getElementById('btn_delete_welder').addEventListener('click', deleteWelder);
+  document.getElementById('btn_add_qual').addEventListener('click', addQualification);
+  document.getElementById('btn_refresh_qual').addEventListener('click', loadQualifications);
+  loadWelders();
+});
+</script>
+</body>
+</html>
